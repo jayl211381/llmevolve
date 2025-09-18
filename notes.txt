@@ -1,0 +1,3 @@
+Trying to feed training cases as part of the prompt is so cooked, its too long, hard to interpret
+and the llm can't even run them in the background. 
+Have the llm self validate. 

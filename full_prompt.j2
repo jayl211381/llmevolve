@@ -1,0 +1,118 @@
+You need to generate a Python script that solves a square container packing optimization problem.
+
+Here is the number of unit squares you need to pack:
+
+<number_of_squares>
+{{NUMBER_OF_SQUARES}}
+</number_of_squares>
+
+Your goal is to create code that packs these unit squares into a square container while minimizing the container's area.
+
+## Core Requirements
+
+- All squares are unit squares (1x1) of identical size
+- The container must be square-shaped
+- Minimize the area of the square container through optimal placement and rotation
+- Your final function must return coordinates that include rotation information
+- Handle overlaps and boundary constraints properly
+
+## Required Output Format
+
+Your Python script must contain a function with this exact signature:
+
+```python
+def square_{NUMBER_OF_SQUARES}_solver():
+    """
+    input: None
+    
+    output: List[Tuple[float, float, float]]
+    - the (x, y, rotation) coordinates of the packed unit squares
+    
+    """
+    square_coordinates = []
+    
+    # Your implementation here
+    
+    return square_coordinates
+```
+
+For example, if packing 3 squares, your function might return:
+```python
+[(1.0, 1.0, 0.0), (2.0, 1.0, 45.0), (1.5, 2.0, 30.0)]
+```
+where each tuple represents (x_coordinate, y_coordinate, rotation_in_degrees).
+
+## Analysis Requirements
+
+Before writing your script, work through your approach systematically in <mathematical_analysis> tags. Take your time with each step and work through specific numerical examples to verify your mathematical formulations. It's OK for this section to be quite long, as thorough mathematical analysis is essential for a correct implementation. Address each of the following points in order:
+
+### 1. Problem Understanding
+- Calculate the theoretical minimum container size (if packing N unit squares perfectly, minimum area would be N, so minimum side length would be √N)
+- Confirm specifications of the unit squares that need packing
+- Decide rotation constraints for squares and justify your choice
+- Ensure container remains square-shaped throughout
+
+### 2. Mathematical Representation and Verification
+- Describe how you will represent each unit square mathematically (center point + rotation angle)
+- Derive step-by-step the formulas for calculating corner coordinates of a rotated unit square, showing all trigonometric work
+- Test your corner coordinate formulas: pick at least 3 specific examples (e.g., square at (2,3) with 30° rotation, square at (1,1) with 45° rotation, etc.) and calculate the exact (x,y) coordinates of all four corners for each
+- Write mathematical inequalities ensuring squares stay within square container boundaries and verify these inequalities work correctly with your test examples from above
+- Derive mathematical conditions for detecting overlaps between two rotated unit squares (this should involve checking if any corners of one square lie inside the other, or if edges intersect)
+- Test your overlap detection: create 2-3 pairs of squares where you know they should overlap and 2-3 pairs where they shouldn't, apply your mathematical conditions, and verify you get the correct results
+
+### 3. Constraint Formulation and Validation
+- Write exact constraint equations for boundary conditions in square container
+- Write exact constraint equations for non-overlapping conditions  
+- Apply these constraints to all your specific examples from step 2 and show the calculations to verify they work correctly
+- Address numerical precision issues with rotation and overlap detection, specifying exact tolerance values (e.g., 1e-6)
+- Create a test case where you manually verify that a specific configuration of 2-3 squares satisfies all your constraints
+
+### 4. Optimization Strategy
+- Compare 2-3 different optimization methods suitable for geometric packing problems and choose one with detailed justification
+- Structure objective function to maximize squares packed in smallest square container - write out the exact mathematical formulation
+- Plan initialization with reasonable starting positions and explain reasoning with specific examples
+- Consider strategies for avoiding local optima and justify approach
+- Identify potential failure modes and how you'll handle them
+
+### 5. Implementation Plan and Verification
+- List specific libraries and functions you will use with justifications
+- Plan graceful handling of constraint violations with examples
+- Decide what to do if not all squares can fit
+- Address computational challenges (runtime, memory, convergence) with proposed solutions
+- Plan testing approach to verify solution correctness
+- Outline how you'll verify your final solution actually satisfies all constraints
+
+## Code Structure Requirements
+
+Structure your script as follows:
+
+```python
+# Import statements and library setup
+
+# Problem parameters and square container definition
+
+# Mathematical helper functions
+# (Functions for rotation, overlap detection, boundary checking)
+
+# Optimization setup  
+# (Define variables, objective function, constraints)
+
+# Main solver function with required signature
+def square_{NUMBER_OF_SQUARES}_solver():
+    # Solver implementation and execution
+    # Results processing
+    return square_coordinates
+
+# Optional: Results visualization or testing code
+```
+
+## Implementation Requirements
+
+- Implement proper constraint handling for non-overlapping and boundary conditions
+- Include rotation logic with correct geometric transformations
+- Add comprehensive comments explaining mathematical formulations and approach
+- Ensure container remains square-shaped throughout implementation
+- Return coordinates as list of (x, y, rotation) tuples where rotation is in degrees
+- Handle the case where perfect packing may not be possible
+
+Focus on creating a complete, working solution that minimizes the square container's area while successfully packing all unit squares with their rotation information.

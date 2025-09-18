@@ -1,0 +1,78 @@
+You need to generate a Python script that solves a square container packing optimization problem.
+
+Here is the number of unit squares you need to pack:
+
+<number_of_squares>
+{{NUMBER_OF_SQUARES}}
+</number_of_squares>
+
+Your goal is to create code that packs these unit squares into a square container while minimizing the container's area.
+
+## Core Requirements
+
+- All squares are unit squares (1x1) of identical size
+- The container must be square-shaped
+- Minimize the area of the square container through optimal placement and rotation
+- Your final function must return coordinates that include rotation information
+- Handle overlaps and boundary constraints properly
+
+## Required Output Format
+
+Your Python script must contain a function with this exact signature:
+
+```python
+def square_{NUMBER_OF_SQUARES}_solver():
+    """
+    input: None
+    
+    output: List[Tuple[float, float, float]]
+    - the (x, y, rotation) coordinates of the packed unit squares
+    
+    """
+    square_coordinates = []
+    
+    # Your implementation here
+    
+    return square_coordinates
+```
+
+For example, if packing 3 squares, your function might return:
+```python
+[(1.0, 1.0, 0.0), (2.0, 1.0, 45.0), (1.5, 2.0, 30.0)]
+```
+where each tuple represents (x_coordinate, y_coordinate, rotation_in_degrees).
+
+## Code Structure Requirements
+
+Structure your script as follows:
+
+```python
+# Import statements and library setup
+
+# Problem parameters and square container definition
+
+# Mathematical helper functions
+# (Functions for rotation, overlap detection, boundary checking)
+
+# Optimization setup  
+# (Define variables, objective function, constraints)
+
+# Main solver function with required signature
+def square_{NUMBER_OF_SQUARES}_solver():
+    # Solver implementation and execution
+    # Results processing
+    return square_coordinates
+
+# Optional: Results visualization or testing code
+```
+
+## Implementation Requirements
+
+- Implement proper constraint handling for non-overlapping and boundary conditions
+- Include rotation logic with correct geometric transformations
+- Add comprehensive comments explaining mathematical formulations and approach
+- Ensure container remains square-shaped throughout implementation
+- Return coordinates as list of (x, y, rotation) tuples where rotation is in degrees
+- Handle the case where perfect packing may not be possible
+
+Focus on creating a complete, working solution that minimizes the square container's area while successfully packing all unit squares with their rotation information.
