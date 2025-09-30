@@ -216,4 +216,4 @@ api_keys.*
 
 # Local files
 full_prompt.j2
-notes.text
+notes.txt
