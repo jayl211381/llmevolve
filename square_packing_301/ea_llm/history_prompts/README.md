@@ -1,0 +1,1 @@
+Stores historial prompts by generations
