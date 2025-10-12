@@ -1,0 +1,106 @@
+<prompt>
+    <instructions>
+        You are evaluating a Python solution for a square container packing optimization problem.
+
+        <evaluation_problem>
+            The solution attempts to pack unit squares into a square container:
+
+            <number_of_squares>
+            {{NUMBER_OF_SQUARES}}
+            </number_of_squares>
+
+            The solution code is as follows:
+            <solution_code>
+            {{CODE_SNIPPET}}
+            </solution_code>
+
+            The solution has been evaluted for geometric validity and packing efficiency, yielding these results:
+            <evaluation_results>
+            Side Length: {{SIDE_LENGTH}}
+            Efficiency: {{EFFICIENCY}}%
+            Overlaps Detected: {{OVERLAPS}}
+            Is Valid: {{IS_VALID}}
+            </evaluation_results>
+
+        </evaluation_problem>
+
+        Your task is to assess the solution across three key dimensions and provide a comprehensive evaluation.
+
+        <evaluation_criteria>
+            ## Assessment Dimensions
+
+            1. **Simplicity of Code**
+               - Is the code readable and well-structured?
+               - Are variable names meaningful and clear?
+               - Is the logic straightforward without unnecessary complexity?
+               - Does it follow clean coding principles?
+
+            2. **Utilization of Rotation**
+               - Does the solution effectively use rotation to improve packing density?
+               - Are rotation angles calculated and applied correctly?
+               - Does rotation contribute meaningfully to space optimization?
+               - Is the rotation logic mathematically sound?
+
+            3. **Innovation of Approach**
+               - Does the solution use creative or novel optimization techniques?
+               - Is the packing strategy intelligent and well-designed?
+               - Does it employ advanced algorithms or heuristics?
+               - How does it handle constraints and optimization challenges?
+
+            <Required Output Format>
+
+                Provide your evaluation in this exact structure:
+
+                ```json
+                {
+                    "simplicity_score": float,  // 0.0 to 10.0
+                    "rotation_utilization_score": float,  // 0.0 to 10.0  
+                    "innovation_score": float,  // 0.0 to 10.0
+                    "overall_score": float,  // 0.0 to 10.0
+                    "simplicity_feedback": "string",
+                    "rotation_feedback": "string", 
+                    "innovation_feedback": "string",
+                    "overall_feedback": "string"
+                }
+                ```
+
+            </Required Output Format>
+
+            <Scoring Guidelines>
+
+                **Simplicity (0-10)**
+                - 9-10: Clean, readable code with clear structure
+                - 7-8: Well-organized with minor complexity issues
+                - 5-6: Moderate complexity, some unclear sections
+                - 3-4: Overly complex or poorly structured
+                - 0-2: Difficult to understand or follow
+
+                **Rotation Utilization (0-10)**
+                - 9-10: Sophisticated rotation optimization with clear benefits
+                - 7-8: Good use of rotation for packing improvement
+                - 5-6: Basic rotation implementation
+                - 3-4: Limited or ineffective rotation usage
+                - 0-2: No rotation or incorrect implementation
+
+                **Innovation (0-10)**
+                - 9-10: Novel algorithms or creative optimization approaches
+                - 7-8: Smart heuristics or interesting techniques
+                - 5-6: Standard approaches with some enhancements
+                - 3-4: Basic implementations with minimal creativity
+                - 0-2: Simple grid placement or trivial approaches
+
+            </Scoring Guidelines>
+
+        </evaluation_criteria>
+
+        <evaluation_requirements>
+            - Analyze the actual code implementation and results
+            - Provide specific feedback citing code examples where relevant
+            - Focus on technical merit and mathematical correctness
+            - Consider both algorithmic approach and execution quality
+            - Evaluate how well the solution addresses the optimization challenge
+            
+            Base your assessment on the code quality, mathematical rigor, and optimization effectiveness demonstrated in the solution.
+        </evaluation_requirements>
+    </instructions>
+</prompt>
