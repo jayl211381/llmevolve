@@ -7,97 +7,92 @@ import json
 import math
 import os
 
-def load_solution(file_path: str):
-    """Load solution from JSON file."""
-    with open(file_path, 'r') as f:
-        data = json.load(f)
-        return data if isinstance(data, list) else data['coordinates']
-
-def get_square_corners(cx: float, cy: float, rotation: float = 0.0):
-    """Calculate corners of a unit square."""
-    theta = math.radians(rotation)
-    cos_theta = math.cos(theta)
-    sin_theta = math.sin(theta)
+class SquarePackingEvaluator:
     
-    corners = []
-    for dx, dy in [(-0.5, -0.5), (0.5, -0.5), (0.5, 0.5), (-0.5, 0.5)]:
-        rotated_x = dx * cos_theta - dy * sin_theta
-        rotated_y = dx * sin_theta + dy * cos_theta
-        corners.append((cx + rotated_x, cy + rotated_y))
+    def __init__(self):
+        self.results = {}
     
-    return corners
-
-def squares_overlap(square1, square2):
-    """Check if two squares overlap."""
-    cx1, cy1, rot1 = square1
-    cx2, cy2, rot2 = square2
+    def load_solution(self, file_path):
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+            return data if isinstance(data, list) else data['coordinates']
     
-    corners1 = get_square_corners(cx1, cy1, rot1)
-    corners2 = get_square_corners(cx2, cy2, rot2)
+    def run_extracted_code(self, code_file_path, solution_file, function_name="square_301_solver"):
+        if not os.path.exists(code_file_path):
+            return None
+        
+        namespace = {}
+        with open(code_file_path, 'r', encoding='utf-8') as f:
+            exec(f.read(), namespace)
+        
+        if function_name in namespace and callable(namespace[function_name]):
+            result = namespace[function_name]()
+            with open(solution_file, 'w') as f:
+                json.dump(result, f, indent=2)
+            return result
+        return None
     
-    def point_in_square(px, py, corners):
-        for i in range(4):
-            x1, y1 = corners[i]
-            x2, y2 = corners[(i + 1) % 4]
-            cross = (x2 - x1) * (py - y1) - (y2 - y1) * (px - x1)
-            if cross < -1e-6:
-                return False
-        return True
+    def get_square_corners(self, cx, cy, rotation=0.0):
+        theta = math.radians(rotation)
+        cos_t, sin_t = math.cos(theta), math.sin(theta)
+        
+        corners = []
+        for dx, dy in [(-0.5, -0.5), (0.5, -0.5), (0.5, 0.5), (-0.5, 0.5)]:
+            rx = dx * cos_t - dy * sin_t
+            ry = dx * sin_t + dy * cos_t
+            corners.append((cx + rx, cy + ry))
+        return corners
     
-    # Check if any corner of one square is in the other
-    for corner in corners1:
-        if point_in_square(corner[0], corner[1], corners2):
+    def squares_overlap(self, square1, square2):
+        corners1 = self.get_square_corners(*square1)
+        corners2 = self.get_square_corners(*square2)
+        
+        def point_in_square(px, py, corners):
+            for i in range(4):
+                x1, y1 = corners[i]
+                x2, y2 = corners[(i + 1) % 4]
+                if (x2 - x1) * (py - y1) - (y2 - y1) * (px - x1) < -1e-6:
+                    return False
             return True
-    for corner in corners2:
-        if point_in_square(corner[0], corner[1], corners1):
-            return True
+        
+        for corner in corners1:
+            if point_in_square(*corner, corners2):
+                return True
+        for corner in corners2:
+            if point_in_square(*corner, corners1):
+                return True
+        return False
     
-    return False
-
-def evaluate_solution(coordinates):
-    """Evaluate the solution."""
-    print(f"Number of squares: {len(coordinates)}")
+    def evaluate_solution(self, coordinates, output_path=None):
+        num_squares = len(coordinates)
+        
+        overlaps = sum(1 for i in range(num_squares) 
+                      for j in range(i + 1, num_squares)
+                      if self.squares_overlap(coordinates[i], coordinates[j]))
+        
+        all_corners = []
+        for coord in coordinates:
+            all_corners.extend(self.get_square_corners(*coord))
+        
+        xs = [corner[0] for corner in all_corners]
+        ys = [corner[1] for corner in all_corners]
+        side_length = max(max(xs) - min(xs), max(ys) - min(ys))
+        
+        self.results = {
+            'num_squares': num_squares,
+            'overlaps': overlaps,
+            'is_valid': overlaps == 0,
+            'side_length': round(side_length, 3),
+            'efficiency': round(num_squares / (side_length ** 2) * 100, 1)
+        }
+        
+        if output_path:
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
+            with open(output_path, 'w') as f:
+                json.dump(self.results, f, indent=2)
+        
+        return self.results
     
-    # Check overlaps
-    overlaps = 0
-    for i in range(len(coordinates)):
-        for j in range(i + 1, len(coordinates)):
-            if squares_overlap(coordinates[i], coordinates[j]):
-                overlaps += 1
-    
-    print(f"Overlapping pairs: {overlaps}")
-    print("✓ VALID" if overlaps == 0 else "✗ INVALID")
-    
-    # Calculate container size
-    all_corners = []
-    for cx, cy, rotation in coordinates:
-        all_corners.extend(get_square_corners(cx, cy, rotation))
-    
-    min_x = min(corner[0] for corner in all_corners)
-    max_x = max(corner[0] for corner in all_corners)
-    min_y = min(corner[1] for corner in all_corners)
-    max_y = max(corner[1] for corner in all_corners)
-    
-    side_length = max(max_x - min_x, max_y - min_y)
-    area = side_length ** 2
-    efficiency = len(coordinates) / area * 100
-    
-    print(f"Square side length: {side_length:.3f}")
-    print(f"Packing efficiency: {efficiency:.1f}%")
-
-def main():
-    """Main evaluation function."""
-    solution_file = os.path.join(os.path.dirname(__file__), '..', 'one_shot_code_generation', 'llm_gen', 'llm_generated_solution.json')
-    
-    if not os.path.exists(solution_file):
-        solution_file = os.path.join(os.path.dirname(__file__), '..', 'one_shot_code_generation', 'llm_generated_solution.json')
-    
-    if not os.path.exists(solution_file):
-        print("Solution file not found!")
-        return
-    
-    coordinates = load_solution(solution_file)
-    evaluate_solution(coordinates)
-
-if __name__ == "__main__":
-    main()
+    def evaluate_from_code(self, code_file_path, solution_file, function_name="square_301_solver", results_file=None):
+        coordinates = self.run_extracted_code(code_file_path, solution_file, function_name)
+        return self.evaluate_solution(coordinates, results_file) if coordinates else None
