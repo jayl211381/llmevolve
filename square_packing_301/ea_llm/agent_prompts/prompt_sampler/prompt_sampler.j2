@@ -1,0 +1,133 @@
+<prompt>
+    <instructions>
+    Act as an innovative optimization researcher and algorithms explorer. Your primary mission is to 
+    EXPERIMENT and DISCOVER novel approaches to the square packing problem, even if they seem unconventional 
+    or don't work perfectly on the first attempt. You are working on the classic computational geometry 
+    problem of packing {{ NUM_SQUARES }} unit squares into the smallest possible containing square.
+
+    <context>
+    EXPLORATION MINDSET: Prioritize creative, experimental approaches over incremental improvements. 
+    The goal is to generate diverse algorithmic ideas that push boundaries - partial implementations, 
+    novel concepts, and experimental techniques are highly valued. You are developing Python solutions 
+    that optimize the placement of exactly {{ NUM_SQUARES }} unit squares (1x1) within a larger square 
+    container, minimizing the container's area while ensuring no overlaps. Bold experimentation is 
+    encouraged over conservative optimization.
+    
+    THEORETICAL OPTIMUM: The optimal side length for perfect packing would be √{{ NUM_SQUARES }} ≈ {{ "%.3f"|format(NUM_SQUARES**0.5) }}.
+    </context>
+
+    <prior_solutions>
+    Previously we found that the following solutions performed well on the square packing task:
+    {% for program in PARENT_PROGRAMS %}
+    
+    fitness_score: {{ PROGRAM_FITNESS_SCORE }}
+    side_length: {{ PROGRAM_SIDE_LENGTH }}
+    efficiency: {{ PROGRAM_EFFICIENCY }}%
+    overlap_penalty: -{{ PROGRAM_OVERLAP_PENALTY }}
+    llm_evaluation_response: {{ PROGRAM_LLM_EVALUATION_RESPONSE }}
+    
+    ```python
+    {{ PRIOR_PROGRAM_CODE }}
+    ```
+    {% endfor %}
+    </prior_solutions>
+
+    <current_solution>
+    Here is the current solution we are trying to improve (you will need to propose a modification to it below).
+    
+    fitness_score: {{ PROGRAM_FITNESS_SCORE }}
+    side_length: {{ PROGRAM_SIDE_LENGTH }}
+    efficiency: {{ PROGRAM_EFFICIENCY }}%
+    overlap_penalty: -{{ PROGRAM_OVERLAP_PENALTY }}
+    llm_evaluation_response: {{ PROGRAM_LLM_EVALUATION_RESPONSE }}
+
+    ```python
+    {{ CURRENT_PROGRAM_CODE }}
+    ```
+    </current_solution>
+
+    <research_inspirations>
+    Consider these optimization techniques and algorithmic approaches:
+    {% for inspiration in INSPIRATIONS %}
+    {{ INSPIRATION }}
+    
+    {% endfor %}
+    </research_inspirations>
+
+    <rules>
+    EXPERIMENTAL SEARCH/REPLACE Guidelines:
+    1. PRIORITIZE NOVELTY: Propose bold, experimental approaches even if uncertain about success
+    2. Use SEARCH/REPLACE blocks to introduce completely new algorithmic concepts
+    3. SEARCH block must contain the exact code to be replaced (including whitespace)  
+    4. REPLACE block should introduce innovative techniques, novel data structures, or creative approaches
+    5. Don't worry about perfection - experimental implementations that need refinement are valuable
+    6. The solution must attempt to handle {{ NUM_SQUARES }} squares (partial solutions acceptable for exploration)
+    7. Creative departures from traditional packing approaches are strongly encouraged
+    8. Consider hybrid techniques, bio-inspired algorithms, physics simulations, or unconventional methods
+
+    EMBRACE EXPERIMENTATION: Your changes should explore uncharted territory rather than make safe improvements. 
+    Failed experiments that teach us something new are more valuable than minor optimizations.
+
+    Example SEARCH/REPLACE format:
+    ```
+    SEARCH
+    def simple_grid_placement():
+        squares = []
+        for i in range({{ NUM_SQUARES }}):
+            x = (i % 18) * 1.1  # Simple grid
+            y = (i // 18) * 1.1
+            squares.append({'x': x, 'y': y, 'rotation': 0})
+        return squares
+    REPLACE
+    def optimized_spiral_placement():
+        squares = []
+        angle_step = 0.1
+        radius_growth = 0.05
+        for i in range({{ NUM_SQUARES }}):
+            angle = i * angle_step
+            radius = math.sqrt(i) * radius_growth
+            x = radius * math.cos(angle) + 10  # Center offset
+            y = radius * math.sin(angle) + 10
+            squares.append({'x': x, 'y': y, 'rotation': angle % (math.pi/2)})
+        return squares
+    ```
+    </rules>
+
+    <task>
+    MISSION: MINIMIZE SIDE LENGTH TO APPROACH THE THEORETICAL OPTIMUM OF √{{ NUM_SQUARES }} ≈ {{ "%.3f"|format(NUM_SQUARES**0.5) }}
+
+    Your primary goal is to develop techniques that systematically reduce container side length. Focus on approaches that:
+
+    **DENSITY MAXIMIZATION STRATEGIES:**
+    - Perfect tessellation patterns that eliminate wasted space
+    - Optimal rotation angles that create tighter interlocking arrangements  
+    - Boundary optimization to minimize container padding
+    - Gap elimination algorithms that identify and close empty spaces
+    - Compression techniques that squeeze squares into minimal area
+
+    **PRECISION PACKING METHODS:**
+    - Sub-pixel positioning for ultra-tight arrangements
+    - Mathematical optimization of square orientations and positions
+    - Geometric constraint solving for minimal bounding rectangles
+    - Space-filling curves that maximize area utilization
+    - Iterative refinement to approach theoretical limits
+
+    **ADVANCED OPTIMIZATION TECHNIQUES:**
+    - Simulated annealing with temperature schedules focused on side length reduction
+    - Genetic algorithms with fitness functions heavily weighted toward container minimization
+    - Gradient-based optimization of square coordinates for minimal bounding area
+    - Physics simulation with attractive forces pulling squares toward center
+    - Multi-objective optimization balancing overlap elimination and area minimization
+
+    **CRITICAL SUCCESS FACTORS:**
+    - Every modification should demonstrably reduce the final container side length
+    - Prioritize techniques that show measurable progress toward √{{ NUM_SQUARES }}
+    - Focus on eliminating the largest gaps and inefficiencies first
+    - Consider how rotation can create space savings of 10%+ over axis-aligned placement
+    - Implement precise positioning algorithms that exploit sub-unit spacing opportunities
+
+    CHALLENGE: Can you reduce the side length by at least 5% compared to current solutions? 
+    What innovative approach could get us closer to the theoretical minimum of {{ "%.3f"|format(NUM_SQUARES**0.5) }}?
+    </task>
+    </instructions>
+</prompt>

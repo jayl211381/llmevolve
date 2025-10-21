@@ -17,14 +17,14 @@ INITIAL_PROGRAM = os.path.join(os.path.dirname(__file__), 'base_program.py')
 #----------------------------------------------------------------------------------------------------
 
 # Island model parameters
-ISLAND_COUNT = 5
-MIGRATION_INTERVAL = 10  # Number of generations between migrations
+ISLAND_COUNT = 3
+MIGRATION_INTERVAL = 5  # Number of generations between migrations
 
 # Population parameters
 POPULATION_SIZE = 20
-MUTATION_RATE = 0.3
-TOURNAMENT_SIZE = 5
-GENERATIONS = 1000
+TOURNAMENT_SIZE = 8
+TOURNAMENT_FINALISTS_SIZE = 4
+GENERATIONS = 10
 
 # map elite model parameters
 # MUTATION_RATE = 0.1

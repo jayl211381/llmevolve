@@ -129,12 +129,22 @@ class SquarePackingEvaluator:
         ys = [corner[1] for corner in all_corners]
         side_length = max(max(xs) - min(xs), max(ys) - min(ys))
         
+        # Calculate fitness score with steeper slope near theoretical minimum
+        theoretical_minimum = num_squares ** 0.5
+        if side_length > 0:
+            ratio = theoretical_minimum / side_length
+            # Apply exponential function to create steeper slope near optimum
+            fitness_score = ratio ** 2  # Higher exponent = steeper slope towards optimum
+        else:
+            fitness_score = 0 
+        
         self.results.update({
             'num_squares': num_squares,
             'overlaps': overlaps,
             'is_valid': overlaps == 0,
             'side_length': round(side_length, 3),
-            'efficiency': round(num_squares / (side_length ** 2) * 100, 1)
+            'efficiency': round(num_squares / (side_length ** 2) * 100, 1),
+            'fitness_score': fitness_score
         })
 
         self.evaluate_with_llm(code_file_path, coordinates)
