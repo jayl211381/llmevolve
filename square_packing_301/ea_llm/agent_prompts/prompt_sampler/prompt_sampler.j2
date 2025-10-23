@@ -17,29 +17,34 @@
     </context>
 
     <prior_solutions>
+    {% if PRIOR_PROGRAMS and PRIOR_PROGRAMS|length > 0 %}
     Previously we found that the following solutions performed well on the square packing task:
-    {% for program in PARENT_PROGRAMS %}
+    {% for program in PRIOR_PROGRAMS %}
     
-    fitness_score: {{ PROGRAM_FITNESS_SCORE }}
-    side_length: {{ PROGRAM_SIDE_LENGTH }}
-    efficiency: {{ PROGRAM_EFFICIENCY }}%
-    overlap_penalty: -{{ PROGRAM_OVERLAP_PENALTY }}
-    llm_evaluation_response: {{ PROGRAM_LLM_EVALUATION_RESPONSE }}
-    
+    fitness_score: {{ program.fitness_score }}
+    side_length: {{ program.side_length }}
+    efficiency: {{ program.efficiency }}%
+    overlap_penalty: -{{ program.overlap_penalty }}
+    llm_evaluation_response: {{ program.llm_evaluation_response }}
+
     ```python
-    {{ PRIOR_PROGRAM_CODE }}
+    {{ program.code }}
     ```
     {% endfor %}
+    {% else %}
+    This is an initial exploration - no prior solutions are available for reference. 
+    Focus on developing a novel approach from scratch.
+    {% endif %}
     </prior_solutions>
 
     <current_solution>
     Here is the current solution we are trying to improve (you will need to propose a modification to it below).
     
-    fitness_score: {{ PROGRAM_FITNESS_SCORE }}
-    side_length: {{ PROGRAM_SIDE_LENGTH }}
-    efficiency: {{ PROGRAM_EFFICIENCY }}%
-    overlap_penalty: -{{ PROGRAM_OVERLAP_PENALTY }}
-    llm_evaluation_response: {{ PROGRAM_LLM_EVALUATION_RESPONSE }}
+    fitness_score: {{ CURRENT_PROGRAM_FITNESS_SCORE }}
+    side_length: {{ CURRENT_PROGRAM_SIDE_LENGTH }}
+    efficiency: {{ CURRENT_PROGRAM_EFFICIENCY }}%
+    overlap_penalty: -{{ CURRENT_PROGRAM_OVERLAP_PENALTY }}
+    llm_evaluation_response: {{ CURRENT_PROGRAM_LLM_EVALUATION_RESPONSE }}
 
     ```python
     {{ CURRENT_PROGRAM_CODE }}

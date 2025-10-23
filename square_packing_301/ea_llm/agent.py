@@ -7,10 +7,11 @@ from logger import LOGGER
 from util import load_pdf_as_base64, load_img_as_base64, force_remove_all_files_in_directory
 from config_prompt import SAMPLER_PROMPT, SAMPLER_PROMPT_SYSTEM
 from config import NUM_SQUARES, LLM_ENSEMBLE_MODELS
-from llm import call_llm
+from llm.call_llm import call_llm
 from data_classes import Program
 import json
-
+import re
+from typing import List, Tuple
 
 class Optimization_agent:
     def __init__(self, island):
@@ -28,6 +29,7 @@ class Optimization_agent:
                     continue
                     
                 file_ext = file_name.lower()
+                
                 if file_ext.endswith('.pdf'):
                     inspirations.append(load_pdf_as_base64(file_path))
                 elif file_ext.endswith(('.png', '.jpg', '.jpeg')):
@@ -35,6 +37,8 @@ class Optimization_agent:
                 elif file_ext.endswith('.txt'):
                     with open(file_path, 'r', encoding='utf-8') as f:
                         inspirations.append(f.read())
+                elif file_ext.endswith(('md')):
+                    continue
                 else:
                     raise Exception(f"Unsupported file type in inspirations: {file_name}")
                 
@@ -44,54 +48,118 @@ class Optimization_agent:
         # combines parent programs with inspirations to create a new prompt
         inspirations = self.load_inspirations()
 
+        # Prepare prior programs data if we have prior programs
+        prior_programs_data = []
+        if hasattr(self, 'prior_programs') and self.prior_programs:
+            for program in self.prior_programs:
+                prior_programs_data.append({
+                    'fitness_score': getattr(program, 'fitness_score', 'N/A'),
+                    'side_length': getattr(program, 'side_length', 'N/A'),
+                    'efficiency': getattr(program, 'efficiency', 'N/A'),
+                    'overlap_penalty': getattr(program, 'overlaps', 'N/A'),
+                    'llm_evaluation_response': getattr(program, 'llm_evaluation', 'N/A'),
+                    'code': getattr(program, 'code', '')
+                })
+
+        # Assert that the current program must have code
+        assert getattr(self.current_program, 'code', None), "Current program must have code"
+
         # Load and render the template with the data
         rendered_prompt = SAMPLER_PROMPT.render(
             NUM_SQUARES=NUM_SQUARES,
-            PROGRAM_FITNESS_SCORE=None,
-            PROGRAM_CONTAINER_SIZE=None,
-            PROGRAM_OVERLAP_PENALTY=None,
-            PRIOR_PROGRAM_CODE=None,
+            PRIOR_PROGRAMS=prior_programs_data,
             
-            CURRENT_PROGRAM_FITNESS_SCORE=None,
-            CURRENT_PROGRAM_CONTAINER_SIZE=None,
-            CURRENT_PROGRAM_OVERLAP_PENALTY=None,
-            CURRENT_PROGRAM_CODE=None,
+            # Current program data
+            CURRENT_PROGRAM_FITNESS_SCORE=getattr(self.current_program, 'fitness_score', 'N/A'),
+            CURRENT_PROGRAM_SIDE_LENGTH=getattr(self.current_program, 'side_length', 'N/A'),
+            CURRENT_PROGRAM_EFFICIENCY=getattr(self.current_program, 'efficiency', 'N/A'),
+            CURRENT_PROGRAM_OVERLAP_PENALTY=getattr(self.current_program, 'overlap_penalty', 'N/A'),
+            CURRENT_PROGRAM_LLM_EVALUATION_RESPONSE=getattr(self.current_program, 'llm_evaluation_response', 'N/A'),
+            CURRENT_PROGRAM_CODE=getattr(self.current_program, 'code', 'N/A'),
             
             INSPIRATIONS=inspirations
         )
         
         return rendered_prompt
     
+    def extract_code_from_response(self, response: str, model: str) -> str:
+        """Extract code snippet from LLM response."""
+        # Save the full LLM response to a text file 
+        response_file_path = os.path.join(os.path.dirname(__file__), 'llm_gen/llm_response.txt')
+        try:
+            with open(response_file_path, 'w', encoding='utf-8') as f:
+                f.write("=" * 80 + "\n")
+                f.write("LLM RESPONSE FOR SQUARE PACKING PROBLEM\n")
+                f.write("=" * 80 + "\n")
+                f.write(f"Timestamp: {__import__('datetime').datetime.now()}\n")
+                f.write(f"Model: {model}\n")
+                f.write(response)
+                
+            print(f"Full LLM response saved to: {response_file_path}")
+        except Exception as e:
+            print(f"Warning: Could not save LLM response to file: {e}")
+            
+        self.parse_solution(response)
+        return
+    
+    def parse_solution(response: str) -> List[Tuple[int, int]]:
+        """
+        Parse the LLM response to extract a single Python code block and save it to a file
+        """
+        
+        # Extract Python code blocks from the response
+        code_blocks = re.findall(r'```python\s*(.*?)\s*```', response, re.DOTALL)
+        
+        if not code_blocks:
+            print("No Python code blocks found in the response")
+            return []
+        
+        if len(code_blocks) > 1:
+            print(f"Warning: Found {len(code_blocks)} code blocks, expected only 1. Using the first one.")
+        
+        # Save the first (and expected only) code block
+        code_block = code_blocks[0]
+        code_file_path = os.path.join(os.path.dirname(__file__), 'llm_gen/extracted_code_block_1.py')
+        
+        try:
+            with open(code_file_path, 'w', encoding='utf-8') as code_file:
+                code_file.write(code_block)
+            print(f"Saved code block to: {code_file_path}")
+        except Exception as e:
+            print(f"Error saving code block: {e}")
+            return []
+        
+        print("Code block saved successfully.")
+        return [] 
+    
     def ensemble_generate_diff(self):
         # Generate diffs using an ensemble of LLM models
-        self.model_responses = []
-        for provider, model in LLM_ENSEMBLE_MODELS:
+        self.model_responses = {model: [] for model in LLM_ENSEMBLE_MODELS.values()}
+        for provider, model in LLM_ENSEMBLE_MODELS.items():
             response = call_llm(
                 message=self.prompt_sampler(),
                 provider=provider,
                 model=model,
-                system_message=SAMPLER_PROMPT_SYSTEM,
-                max_retries=3,
-                temperature=0.7,
-                top_p=0.9
+                system_prompt=SAMPLER_PROMPT_SYSTEM,
+                temperature=0.7
             )
+            self.model_responses[model].append(response)
             # Process the response to extract the diff
-            diff = self.extract_diff_from_response(response)
-            if diff:
-                self.model_responses.append(diff)
-                
+            diff = self.extract_code_from_response(response, model)
+
+            LOGGER.info(f"Model {provider}/{model} generated diff of length {len(diff) if diff else 0}")
         return self.model_responses
     
     def evolve(self):
         # Evolve the current program using the optimization agent
-        print(f"Evolving program... island {self.island.id}")
+        LOGGER.info(f"Evolving program... island {self.island.id}")
 
         # Get the current and prior best programs
         self.current_program, self.prior_programs = self.island.evolve()
 
-        # Load inspirations and generate new prompt
-        self.prompt_sampler()
-
+        # Load prompts with program data and inspirations and generate solution
+        LOGGER.info("Generating diffs using ensemble LLM models...")
+        self.ensemble_generate_diff()
         return 
 
     def apply_diff(self):
@@ -197,11 +265,16 @@ class ea_controller:
             for island in self.islands:
                 island.migrate = False
 
-    def trigger_optimization_agent(self):
-        # Trigger the optimization agent to evolve the programs
+    def initialize_agents(self):
+        # Initialize the optimization agent for each island
+        self.agents = []
         for island in self.islands:
-            # Agent evolves a new program for the island
             agent = Optimization_agent(island)
+            self.agents.append(agent)
+
+    def start_island_evolution(self):
+        # Start the evolution process for each island
+        for agent in self.agents:
             agent.evolve()
 
 class Island:
@@ -278,11 +351,10 @@ class Island:
             if os.path.exists(base_solution_path):
                 # Copy all files in the folder to the island base folder
                 for file_name in os.listdir(base_solution_path):
-                    # Ignore README.md
-                    if file_name.lower() == 'readme.md':
-                        continue
-                    src_file = os.path.join(base_solution_path, file_name)
-                    dst_file = os.path.join(self.island_folder_location, 'base_solution/' + file_name)
+                    # Process files that are not README.md
+                    if file_name.lower() != 'readme.md':
+                        src_file = os.path.join(base_solution_path, file_name)
+                        dst_file = os.path.join(self.island_folder_location, 'base_solution/' + file_name)
                     # Create destination folder if not exists
                     os.makedirs(os.path.dirname(dst_file), exist_ok=True)
                     # Copy the file
@@ -371,8 +443,7 @@ if __name__ == '__main__':
     
     controller.initiate_islands(num_islands=ISLAND_COUNT, population_size=POPULATION_SIZE,
                                  migration_interval=MIGRATION_INTERVAL, tournament_size=TOURNAMENT_SIZE,
-                                 clean_run=True)
-
-    # controller.trigger_optimization_agent()
-    # agent = Optimization_agent()
-    # agent.prompt_sampler(db)
+                                 clean_run=False)
+    
+    controller.initialize_agents()
+    controller.start_island_evolution()
